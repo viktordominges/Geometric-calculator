@@ -1,4 +1,3 @@
-
 /* BODY {
   perspective: 1000px;
   perspective-origin: center -5em;
@@ -7,6 +6,7 @@
 h1 {
 	margin: 30px 0 70px 0;
 	text-align: center;
+	text-transform: uppercase;
 }
 
 .wrapper {
@@ -122,7 +122,7 @@ h1 {
 
 .calculating__subtitle {
     text-align: center;
-    font-size: 18px;
+    font-size: 26px;
     font-weight: 700;
     margin-top: 30px
 }
@@ -174,10 +174,18 @@ h1 {
 }
 
 .calculating__choose_medium {
-    width: 743px;
+    max-width: 200px;
 	height: 50px;
     justify-content: space-between;
-    margin: 30px auto 0 auto
+    margin: 0 auto;
+	background: #fff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, .5);
+    border: none;
+    text-align: center;
+    font-size: 14px;
+    cursor: pointer;
+    outline: 0;
+    transition: .3s all
 }
 
 .calculating__choose_big {
@@ -218,22 +226,22 @@ h1 {
 
 .side,
 .container {
-  width: 10em;
-  height: 10em;
+  width: 6em;
+  height: 6em;
   }
 
 .container {
   border: 2px dotted white;
   transform-style: preserve-3d;
-  animation: rotate 20s infinite linear;
+  animation: rotate 15s infinite linear;
   }
   .container:before,
   .container:after {
 	content: "";
 	display: block;
 	position: absolute;
-	width: 10em;
-	height: 10em;
+	width: 6em;
+	height: 6em;
 	border: 2px dotted white;
 	}
 	.container:before {
@@ -245,38 +253,38 @@ h1 {
 
 .side {
   position: absolute;
-  width: 10em;
-  height: 10em;
+  width: 6em;
+  height: 6em;
   border: 2px solid white;
   opacity: .7;
   }
 
 .back {
-  transform: translateZ(-5em);
+  transform: translateZ(-3em);
   background: orange;
   }
 
 .left {
-  transform: translateX(-5em) rotateY(90deg);
+  transform: translateX(-3em) rotateY(90deg);
   background: lightgreen;
   }
 
 .right {
-  transform: translateX(5em) rotateY(90deg);
+  transform: translateX(3em) rotateY(90deg);
   background: yellowgreen;
   }
 .top {
-  transform: translateY(-5em) rotateX(90deg);
+  transform: translateY(-3em) rotateX(90deg);
   background: skyblue;
   }
 
 .bottom {
-  transform: translateY(5em) rotateX(90deg);
+  transform: translateY(3em) rotateX(90deg);
   background: steelblue;
   }
 
 .front {
-  transform: translateZ(5em);
+  transform: translateZ(3em);
   background: gold;
   }
 
