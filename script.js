@@ -329,28 +329,28 @@ function calcTriangle() {
     getDynamicInformation('#triangle_leg_1', '#triangle_leg_2');
 }
 
-function calcSquare() {
-    const resultPerimeter = document.querySelector('#result_square_perimeter');
-    const resultArea = document.querySelector('#result_square_area');
+function calcCircle() {
+    const resultPerimeter = document.querySelector('#result_circle_perimeter');
+    const resultArea = document.querySelector('#result_circle_area');
     
-    let figure, side;
+    let figure, radius;
 
     if (localStorage.getItem('figure')) {
         figure = localStorage.getItem('figure');
     } else {
-        figure = 'square';
-        localStorage.setItem('figure', 'square');
+        figure = 'circle';
+        localStorage.setItem('figure', 'circle');
     }
 
     function calcTotal() {
-        if (!figure || figure != 'square' || !side) {
+        if (!figure || figure != 'circle' || !radius) {
             resultPerimeter.textContent = '____';
             resultArea.textContent = '____';
             return;
         }
         else {
-            resultPerimeter.textContent = side * 4;
-            resultArea.textContent = side * side;
+            resultPerimeter.textContent = (radius * Math.PI * 2).toFixed(1);
+            resultArea.textContent = (Math.PI * (radius ** 2)).toFixed(1);
         }
     }
 
@@ -396,7 +396,6 @@ function calcSquare() {
         });
     }
     
-
     getStaticInformation('.calculating__choose-item', 'calculating__choose-item_active');
 
     function getDynamicInformation(selector) {
@@ -408,13 +407,13 @@ function calcSquare() {
             } else {
                 input.style.border = 'none';
             }
-            side = +input.value;
+            radius = +input.value;
 
             calcTotal();
         });
     }
 
-    getDynamicInformation('#square_side');
+    getDynamicInformation('#radius');
 }
 
 window.addEventListener('DOMContentLoaded', function() {
@@ -423,4 +422,5 @@ window.addEventListener('DOMContentLoaded', function() {
     calcSquare();
     calcRectangle();
     calcTriangle();
+    calcCircle();
 });
