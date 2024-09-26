@@ -1,14 +1,16 @@
 
 .calculating__field {
     width: 100%;
-    margin-top: 30px;
-    padding: 30px 0 40px 0;
 }
 
 .calculating__subtitle {
     text-align: center;
     font-size: 26px;
     font-weight: 700;
+    margin-top: 12px;
+}
+
+.calculating__subtitle.first__subtitle {
     margin-top: 30px;
 }
 
@@ -17,7 +19,7 @@
     display: flex;
     flex-wrap: nowrap;
     gap: 20px;
-    margin-top: 30px;
+    margin-top: 25px;
     justify-content: center;
 }
 
