@@ -229,9 +229,198 @@ function calcRectangle() {
     getDynamicInformation('#rectangle_width', '#rectangle_height');
 }
 
+function calcTriangle() {
+    const resultPerimeter = document.querySelector('#result_triangle_perimeter');
+    const resultArea = document.querySelector('#result_triangle_area');
+    
+    let figure, leg1, leg2;
+
+    if (localStorage.getItem('figure')) {
+        figure = localStorage.getItem('figure');
+    } else {
+        figure = 'triangle';
+        localStorage.setItem('figure', 'triangle');
+    }
+
+    function calcTotal() {
+        if (!figure || figure != 'triangle' || !leg1 || !leg2) {
+            resultPerimeter.textContent = '____';
+            resultArea.textContent = '____';
+            return;
+        }
+        else {
+            resultPerimeter.textContent = (leg1 + leg2) + parseFloat(Math.sqrt((leg1 ** 2) + (leg2 ** 2)).toFixed(1));
+            resultArea.textContent = (leg1 * leg2) / 2;
+        }
+    }
+
+    calcTotal();
+
+    function initLocalSettings(selector, activeClass) {
+        const elements = document.querySelectorAll(selector);
+
+        elements.forEach(elem => {
+            elem.classList.remove(activeClass);
+            if (elem.getAttribute('id') === localStorage.getItem('figure')) {
+                elem.classList.add(activeClass);
+            }
+        });
+    }
+
+    initLocalSettings('.calculating__choose-item', 'calculating__choose-item_active');
+
+    function getStaticInformation(selector, activeClass) {
+        const elements = document.querySelectorAll(selector);
+    
+        elements.forEach(elem => {
+            elem.addEventListener('click', (e) => {
+                // Находим ближайший родительский элемент, соответствующий селектору
+                const parentElement = e.target.closest(selector);
+    
+                // Если родительский элемент найден, переключаем активный класс
+                if (parentElement) {
+                    figure = parentElement.getAttribute('id');
+                    localStorage.setItem('figure', parentElement.getAttribute('id'));
+    
+                    // Удаляем активный класс у всех элементов
+                    elements.forEach(item => {
+                        item.classList.remove(activeClass);
+                    });
+    
+                    // Добавляем активный класс только родительскому элементу
+                    parentElement.classList.add(activeClass);
+    
+                    calcTotal();
+                }
+            });
+        });
+    }
+    
+
+    getStaticInformation('.calculating__choose-item', 'calculating__choose-item_active');
+
+    function getDynamicInformation(leg1Selector, leg2Selector) {
+        const inputLeg1 = document.querySelector(leg1Selector);
+        const inputLeg2 = document.querySelector(leg2Selector);
+
+        inputLeg1.addEventListener('input', () => {
+            if (inputLeg1.value.match(/\D/g)) {
+                inputLeg1.style.border = "1px solid red";
+            } else {
+                inputLeg1.style.border = 'none';
+            }
+            leg1 = +inputLeg1.value;
+
+            calcTotal();
+        });
+
+        inputLeg2.addEventListener('input', () => {
+            if (inputLeg2.value.match(/\D/g)) {
+                inputLeg2.style.border = "1px solid red";
+            } else {
+                inputLeg2.style.border = 'none';
+            }
+            leg2 = +inputLeg2.value;
+
+            calcTotal();
+        });
+    }
+
+    getDynamicInformation('#triangle_leg_1', '#triangle_leg_2');
+}
+
+function calcSquare() {
+    const resultPerimeter = document.querySelector('#result_square_perimeter');
+    const resultArea = document.querySelector('#result_square_area');
+    
+    let figure, side;
+
+    if (localStorage.getItem('figure')) {
+        figure = localStorage.getItem('figure');
+    } else {
+        figure = 'square';
+        localStorage.setItem('figure', 'square');
+    }
+
+    function calcTotal() {
+        if (!figure || figure != 'square' || !side) {
+            resultPerimeter.textContent = '____';
+            resultArea.textContent = '____';
+            return;
+        }
+        else {
+            resultPerimeter.textContent = side * 4;
+            resultArea.textContent = side * side;
+        }
+    }
+
+    calcTotal();
+
+    function initLocalSettings(selector, activeClass) {
+        const elements = document.querySelectorAll(selector);
+
+        elements.forEach(elem => {
+            elem.classList.remove(activeClass);
+            if (elem.getAttribute('id') === localStorage.getItem('figure')) {
+                elem.classList.add(activeClass);
+            }
+        });
+    }
+
+    initLocalSettings('.calculating__choose-item', 'calculating__choose-item_active');
+
+    function getStaticInformation(selector, activeClass) {
+        const elements = document.querySelectorAll(selector);
+    
+        elements.forEach(elem => {
+            elem.addEventListener('click', (e) => {
+                // Находим ближайший родительский элемент, соответствующий селектору
+                const parentElement = e.target.closest(selector);
+    
+                // Если родительский элемент найден, переключаем активный класс
+                if (parentElement) {
+                    figure = parentElement.getAttribute('id');
+                    localStorage.setItem('figure', parentElement.getAttribute('id'));
+    
+                    // Удаляем активный класс у всех элементов
+                    elements.forEach(item => {
+                        item.classList.remove(activeClass);
+                    });
+    
+                    // Добавляем активный класс только родительскому элементу
+                    parentElement.classList.add(activeClass);
+    
+                    calcTotal();
+                }
+            });
+        });
+    }
+    
+
+    getStaticInformation('.calculating__choose-item', 'calculating__choose-item_active');
+
+    function getDynamicInformation(selector) {
+        const input = document.querySelector(selector);
+
+        input.addEventListener('input', () => {
+            if (input.value.match(/\D/g)) {
+                input.style.border = "1px solid red";
+            } else {
+                input.style.border = 'none';
+            }
+            side = +input.value;
+
+            calcTotal();
+        });
+    }
+
+    getDynamicInformation('#square_side');
+}
+
 window.addEventListener('DOMContentLoaded', function() {
     tabs('.tabheader__item', '.tabcontent', '.tabheader__items', 'tabheader__item_active');
     tabs('.calculating__choose-item', '.tabcontent__dimensions', '.tabcontent', 'calculating__choose-item_active');
     calcSquare();
     calcRectangle();
+    calcTriangle();
 });
