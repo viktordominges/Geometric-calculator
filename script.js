@@ -1,9 +1,9 @@
-function tabs(tabsSelector, tabsContentSelector, tabsParentSelector, activeClass) {
-	let tabs = document.querySelectorAll(tabsSelector),
-		tabsContent = document.querySelectorAll(tabsContentSelector),
-		tabsParent = document.querySelector(tabsParentSelector);
+function tabs(tabsSelector, tabsContentSelector, tabsParentSelector, activeClass, storageKey = 'figure') {
+    const tabs = document.querySelectorAll(tabsSelector),
+          tabsContent = document.querySelectorAll(tabsContentSelector),
+          tabsParent = document.querySelector(tabsParentSelector);
 
-	function hideTabContent() {
+    function hideTabContent() {
         tabsContent.forEach(item => {
             item.classList.add('hide');
             item.classList.remove('show', 'fade');
@@ -12,425 +12,152 @@ function tabs(tabsSelector, tabsContentSelector, tabsParentSelector, activeClass
         tabs.forEach(item => {
             item.classList.remove(activeClass);
         });
-	}
-
-	function showTabContent(i = 0) {
-        tabsContent[i].classList.add('show', 'fade');
-        tabsContent[i].classList.remove('hide');
-        tabs[i].classList.add(activeClass);
     }
 
-    // Проверяем, есть ли в localStorage сохраненная вкладка
-    let savedTab = localStorage.getItem('figure');
-    let startTab = 0; // По умолчанию, если вкладка не сохранена - 0 (первая)
-
-    tabs.forEach((tab, i) => {
-        if (tab.getAttribute('id') === savedTab) {
-            startTab = i; // Если найдено совпадение с сохраненной вкладкой, сохраняем индекс
+    function showTabContent(i = 0) {
+        if (tabs[i] && tabsContent[i]) { // Проверяем, существует ли вкладка и контент
+            tabsContent[i].classList.add('show', 'fade');
+            tabsContent[i].classList.remove('hide');
+            tabs[i].classList.add(activeClass);
+        } else {
+            console.error(`Tab or content with index ${i} not found`);
         }
-    });
-    
-    hideTabContent();
-    showTabContent(startTab); // Показать контент на основе сохраненной вкладки
+    }
 
-	tabsParent.addEventListener('click', function(event) {
-        const target = event.target;
-        // Используем closest для поиска ближайшего элемента, соответствующего селектору таба
-        const tab = target.closest(tabsSelector);
-    
-        // Проверяем, что нашли нужный элемент, и он не null
-        if (tab) {
+    let savedTab = localStorage.getItem(storageKey);
+    let startTab = [...tabs].findIndex(tab => tab.getAttribute('id') === savedTab);
+
+    // Если не найдено совпадение, возвращаем первую вкладку
+    if (startTab === -1) {
+        startTab = 0;
+    }
+
+    hideTabContent();
+    showTabContent(startTab);
+
+    tabsParent.addEventListener('click', (event) => {
+        const target = event.target.closest(tabsSelector);
+        if (target) {
             tabs.forEach((item, i) => {
-                if (tab == item) {
+                if (target === item) {
                     hideTabContent();
                     showTabContent(i);
-                    localStorage.setItem('figure', tab.getAttribute('id')); // Сохраняем вкладку в localStorage
+                    localStorage.setItem(storageKey, target.getAttribute('id'));
                 }
             });
         }
     });
 }
 
-function calcSquare() {
-    const resultPerimeter = document.querySelector('#result_square_perimeter');
-    const resultArea = document.querySelector('#result_square_area');
-    
-    let figure, side;
-
-    if (localStorage.getItem('figure')) {
-        figure = localStorage.getItem('figure');
-    } else {
-        figure = 'square';
-        localStorage.setItem('figure', 'square');
-    }
+function calculate(figureData) {
+    const { perimeterSelector, areaSelector, inputs, calculateFn } = figureData;
+    const resultPerimeter = document.querySelector(perimeterSelector);
+    const resultArea = document.querySelector(areaSelector);
+    let inputData = {};
 
     function calcTotal() {
-        if (!figure || figure != 'square' || !side) {
+        const result = calculateFn(inputData);
+        if (result) {
+            resultPerimeter.textContent = result.perimeter;
+            resultArea.textContent = result.area;
+        } else {
             resultPerimeter.textContent = '____';
             resultArea.textContent = '____';
-            return;
-        }
-        else {
-            resultPerimeter.textContent = side * 4;
-            resultArea.textContent = side * side;
         }
     }
 
     calcTotal();
 
-    function initLocalSettings(selector, activeClass) {
-        const elements = document.querySelectorAll(selector);
-
-        elements.forEach(elem => {
-            elem.classList.remove(activeClass);
-            if (elem.getAttribute('id') === localStorage.getItem('figure')) {
-                elem.classList.add(activeClass);
-            }
-        });
-    }
-
-    initLocalSettings('.calculating__choose-item', 'calculating__choose-item_active');
-
-    function getStaticInformation(selector, activeClass) {
-        const elements = document.querySelectorAll(selector);
-    
-        elements.forEach(elem => {
-            elem.addEventListener('click', (e) => {
-                // Находим ближайший родительский элемент, соответствующий селектору
-                const parentElement = e.target.closest(selector);
-    
-                // Если родительский элемент найден, переключаем активный класс
-                if (parentElement) {
-                    figure = parentElement.getAttribute('id');
-                    localStorage.setItem('figure', parentElement.getAttribute('id'));
-    
-                    // Удаляем активный класс у всех элементов
-                    elements.forEach(item => {
-                        item.classList.remove(activeClass);
-                    });
-    
-                    // Добавляем активный класс только родительскому элементу
-                    parentElement.classList.add(activeClass);
-    
-                    calcTotal();
-                }
-            });
-        });
-    }
-    
-
-    getStaticInformation('.calculating__choose-item', 'calculating__choose-item_active');
-
-    function getDynamicInformation(selector) {
+    inputs.forEach(({ selector, property }) => {
         const input = document.querySelector(selector);
-
         input.addEventListener('input', () => {
             if (input.value.match(/\D/g)) {
                 input.style.border = "1px solid red";
             } else {
                 input.style.border = 'none';
+                inputData[property] = +input.value;
             }
-            side = +input.value;
-
             calcTotal();
         });
-    }
-
-    getDynamicInformation('#square_side');
+    });
 }
 
-function calcRectangle() {
-    const resultPerimeter = document.querySelector('#result_rectangle_perimeter');
-    const resultArea = document.querySelector('#result_rectangle_area');
-    
-    let figure, width, height;
+function initializeCalculations() {
+    const figures = {
+        square: {
+            perimeterSelector: '#result_square_perimeter',
+            areaSelector: '#result_square_area',
+            inputs: [{ selector: '#square_side', property: 'side' }],
+            calculateFn: ({ side }) => side ? {
+                perimeter: side * 4,
+                area: side * side
+            } : null
+        },
+        rectangle: {
+            perimeterSelector: '#result_rectangle_perimeter',
+            areaSelector: '#result_rectangle_area',
+            inputs: [
+                { selector: '#rectangle_width', property: 'width' },
+                { selector: '#rectangle_height', property: 'height' }
+            ],
+            calculateFn: ({ width, height }) => (width && height) ? {
+                perimeter: (width + height) * 2,
+                area: width * height
+            } : null
+        },
+        triangle: {
+            perimeterSelector: '#result_triangle_perimeter',
+            areaSelector: '#result_triangle_area',
+            inputs: [
+                { selector: '#triangle_leg_1', property: 'leg1' },
+                { selector: '#triangle_leg_2', property: 'leg2' }
+            ],
+            calculateFn: ({ leg1, leg2 }) => (leg1 && leg2) ? {
+                perimeter: leg1 + leg2 + parseFloat(Math.sqrt(leg1 ** 2 + leg2 ** 2).toFixed(1)),
+                area: (leg1 * leg2) / 2
+            } : null
+        },
+        circle: {
+            perimeterSelector: '#result_circle_perimeter',
+            areaSelector: '#result_circle_area',
+            inputs: [{ selector: '#radius', property: 'radius' }],
+            calculateFn: ({ radius }) => radius ? {
+                perimeter: (radius * Math.PI * 2).toFixed(1),
+                area: (Math.PI * (radius ** 2)).toFixed(1)
+            } : null
+        }
+    };
 
-    if (localStorage.getItem('figure')) {
-        figure = localStorage.getItem('figure');
+    // Получаем текущую фигуру из localStorage или устанавливаем значение по умолчанию
+    const currentFigure = localStorage.getItem('figure') || 'square';
+
+    // Проверяем, существует ли текущая фигура в figures
+    if (figures[currentFigure]) {
+        calculate(figures[currentFigure]);
     } else {
-        figure = 'rectangle';
-        localStorage.setItem('figure', 'rectangle');
+        console.error(`Figure "${currentFigure}" is not defined in figures.`);
+        calculate(figures['square']); // Устанавливаем значение по умолчанию, если не найдено
     }
 
-    function calcTotal() {
-        if (!figure || figure != 'rectangle' || !width || !height) {
-            resultPerimeter.textContent = '____';
-            resultArea.textContent = '____';
-            return;
-        }
-        else {
-            resultPerimeter.textContent = (width + height) * 2;
-            resultArea.textContent = width * height;
-        }
-    }
-
-    calcTotal();
-
-    function initLocalSettings(selector, activeClass) {
-        const elements = document.querySelectorAll(selector);
-
-        elements.forEach(elem => {
-            elem.classList.remove(activeClass);
-            if (elem.getAttribute('id') === localStorage.getItem('figure')) {
-                elem.classList.add(activeClass);
-            }
-        });
-    }
-
-    initLocalSettings('.calculating__choose-item', 'calculating__choose-item_active');
-
-    function getStaticInformation(selector, activeClass) {
-        const elements = document.querySelectorAll(selector);
-    
-        elements.forEach(elem => {
-            elem.addEventListener('click', (e) => {
-                // Находим ближайший родительский элемент, соответствующий селектору
-                const parentElement = e.target.closest(selector);
-    
-                // Если родительский элемент найден, переключаем активный класс
-                if (parentElement) {
-                    figure = parentElement.getAttribute('id');
-                    localStorage.setItem('figure', parentElement.getAttribute('id'));
-    
-                    // Удаляем активный класс у всех элементов
-                    elements.forEach(item => {
-                        item.classList.remove(activeClass);
-                    });
-    
-                    // Добавляем активный класс только родительскому элементу
-                    parentElement.classList.add(activeClass);
-    
-                    calcTotal();
-                }
-            });
-        });
-    }
-    
-
-    getStaticInformation('.calculating__choose-item', 'calculating__choose-item_active');
-
-    function getDynamicInformation(widthSelector, heightSelector) {
-        const inputWidth = document.querySelector(widthSelector);
-        const inputHeight = document.querySelector(heightSelector);
-
-        inputWidth.addEventListener('input', () => {
-            if (inputWidth.value.match(/\D/g)) {
-                inputWidth.style.border = "1px solid red";
+    document.querySelectorAll('.calculating__choose-item').forEach(tab => {
+        tab.addEventListener('click', () => {
+            const figureId = tab.getAttribute('id');
+            if (figures[figureId]) {
+                calculate(figures[figureId]);
+                localStorage.setItem('figure', figureId); // Сохраняем выбранную фигуру
             } else {
-                inputWidth.style.border = 'none';
-            }
-            width = +inputWidth.value;
-
-            calcTotal();
-        });
-
-        inputHeight.addEventListener('input', () => {
-            if (inputHeight.value.match(/\D/g)) {
-                inputHeight.style.border = "1px solid red";
-            } else {
-                inputHeight.style.border = 'none';
-            }
-            height = +inputHeight.value;
-
-            calcTotal();
-        });
-    }
-
-    getDynamicInformation('#rectangle_width', '#rectangle_height');
-}
-
-function calcTriangle() {
-    const resultPerimeter = document.querySelector('#result_triangle_perimeter');
-    const resultArea = document.querySelector('#result_triangle_area');
-    
-    let figure, leg1, leg2;
-
-    if (localStorage.getItem('figure')) {
-        figure = localStorage.getItem('figure');
-    } else {
-        figure = 'triangle';
-        localStorage.setItem('figure', 'triangle');
-    }
-
-    function calcTotal() {
-        if (!figure || figure != 'triangle' || !leg1 || !leg2) {
-            resultPerimeter.textContent = '____';
-            resultArea.textContent = '____';
-            return;
-        }
-        else {
-            resultPerimeter.textContent = (leg1 + leg2) + parseFloat(Math.sqrt((leg1 ** 2) + (leg2 ** 2)).toFixed(1));
-            resultArea.textContent = (leg1 * leg2) / 2;
-        }
-    }
-
-    calcTotal();
-
-    function initLocalSettings(selector, activeClass) {
-        const elements = document.querySelectorAll(selector);
-
-        elements.forEach(elem => {
-            elem.classList.remove(activeClass);
-            if (elem.getAttribute('id') === localStorage.getItem('figure')) {
-                elem.classList.add(activeClass);
+                console.error(`Figure "${figureId}" is not defined in figures.`);
             }
         });
-    }
-
-    initLocalSettings('.calculating__choose-item', 'calculating__choose-item_active');
-
-    function getStaticInformation(selector, activeClass) {
-        const elements = document.querySelectorAll(selector);
-    
-        elements.forEach(elem => {
-            elem.addEventListener('click', (e) => {
-                // Находим ближайший родительский элемент, соответствующий селектору
-                const parentElement = e.target.closest(selector);
-    
-                // Если родительский элемент найден, переключаем активный класс
-                if (parentElement) {
-                    figure = parentElement.getAttribute('id');
-                    localStorage.setItem('figure', parentElement.getAttribute('id'));
-    
-                    // Удаляем активный класс у всех элементов
-                    elements.forEach(item => {
-                        item.classList.remove(activeClass);
-                    });
-    
-                    // Добавляем активный класс только родительскому элементу
-                    parentElement.classList.add(activeClass);
-    
-                    calcTotal();
-                }
-            });
-        });
-    }
-    
-
-    getStaticInformation('.calculating__choose-item', 'calculating__choose-item_active');
-
-    function getDynamicInformation(leg1Selector, leg2Selector) {
-        const inputLeg1 = document.querySelector(leg1Selector);
-        const inputLeg2 = document.querySelector(leg2Selector);
-
-        inputLeg1.addEventListener('input', () => {
-            if (inputLeg1.value.match(/\D/g)) {
-                inputLeg1.style.border = "1px solid red";
-            } else {
-                inputLeg1.style.border = 'none';
-            }
-            leg1 = +inputLeg1.value;
-
-            calcTotal();
-        });
-
-        inputLeg2.addEventListener('input', () => {
-            if (inputLeg2.value.match(/\D/g)) {
-                inputLeg2.style.border = "1px solid red";
-            } else {
-                inputLeg2.style.border = 'none';
-            }
-            leg2 = +inputLeg2.value;
-
-            calcTotal();
-        });
-    }
-
-    getDynamicInformation('#triangle_leg_1', '#triangle_leg_2');
-}
-
-function calcCircle() {
-    const resultPerimeter = document.querySelector('#result_circle_perimeter');
-    const resultArea = document.querySelector('#result_circle_area');
-    
-    let figure, radius;
-
-    if (localStorage.getItem('figure')) {
-        figure = localStorage.getItem('figure');
-    } else {
-        figure = 'circle';
-        localStorage.setItem('figure', 'circle');
-    }
-
-    function calcTotal() {
-        if (!figure || figure != 'circle' || !radius) {
-            resultPerimeter.textContent = '____';
-            resultArea.textContent = '____';
-            return;
-        }
-        else {
-            resultPerimeter.textContent = (radius * Math.PI * 2).toFixed(1);
-            resultArea.textContent = (Math.PI * (radius ** 2)).toFixed(1);
-        }
-    }
-
-    calcTotal();
-
-    function initLocalSettings(selector, activeClass) {
-        const elements = document.querySelectorAll(selector);
-
-        elements.forEach(elem => {
-            elem.classList.remove(activeClass);
-            if (elem.getAttribute('id') === localStorage.getItem('figure')) {
-                elem.classList.add(activeClass);
-            }
-        });
-    }
-
-    initLocalSettings('.calculating__choose-item', 'calculating__choose-item_active');
-
-    function getStaticInformation(selector, activeClass) {
-        const elements = document.querySelectorAll(selector);
-    
-        elements.forEach(elem => {
-            elem.addEventListener('click', (e) => {
-                // Находим ближайший родительский элемент, соответствующий селектору
-                const parentElement = e.target.closest(selector);
-    
-                // Если родительский элемент найден, переключаем активный класс
-                if (parentElement) {
-                    figure = parentElement.getAttribute('id');
-                    localStorage.setItem('figure', parentElement.getAttribute('id'));
-    
-                    // Удаляем активный класс у всех элементов
-                    elements.forEach(item => {
-                        item.classList.remove(activeClass);
-                    });
-    
-                    // Добавляем активный класс только родительскому элементу
-                    parentElement.classList.add(activeClass);
-    
-                    calcTotal();
-                }
-            });
-        });
-    }
-    
-    getStaticInformation('.calculating__choose-item', 'calculating__choose-item_active');
-
-    function getDynamicInformation(selector) {
-        const input = document.querySelector(selector);
-
-        input.addEventListener('input', () => {
-            if (input.value.match(/\D/g)) {
-                input.style.border = "1px solid red";
-            } else {
-                input.style.border = 'none';
-            }
-            radius = +input.value;
-
-            calcTotal();
-        });
-    }
-
-    getDynamicInformation('#radius');
+    });
 }
 
 window.addEventListener('DOMContentLoaded', function() {
-    tabs('.tabheader__item', '.tabcontent', '.tabheader__items', 'tabheader__item_active');
-    tabs('.calculating__choose-item', '.tabcontent__dimensions', '.tabcontent', 'calculating__choose-item_active');
-    calcSquare();
-    calcRectangle();
-    calcTriangle();
-    calcCircle();
+    // Вызов для общего слайдера фигур
+    tabs('.tabheader__item', '.tabcontent', '.tabheader__items', 'tabheader__item_active', 'generalTab');
+
+// Вызов для вкладок с фигурами
+    tabs('.calculating__choose-item', '.tabcontent__dimensions', '.tabcontent', 'calculating__choose-item_active', 'figureTab');
+    
+    initializeCalculations();
 });
