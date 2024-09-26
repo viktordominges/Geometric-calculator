@@ -4,7 +4,6 @@ function tabs(tabsSelector, tabsContentSelector, tabsParentSelector, activeClass
 		tabsParent = document.querySelector(tabsParentSelector);
 
 	function hideTabContent() {
-        
         tabsContent.forEach(item => {
             item.classList.add('hide');
             item.classList.remove('show', 'fade');
@@ -20,9 +19,19 @@ function tabs(tabsSelector, tabsContentSelector, tabsParentSelector, activeClass
         tabsContent[i].classList.remove('hide');
         tabs[i].classList.add(activeClass);
     }
+
+    // Проверяем, есть ли в localStorage сохраненная вкладка
+    let savedTab = localStorage.getItem('figure');
+    let startTab = 0; // По умолчанию, если вкладка не сохранена - 0 (первая)
+
+    tabs.forEach((tab, i) => {
+        if (tab.getAttribute('id') === savedTab) {
+            startTab = i; // Если найдено совпадение с сохраненной вкладкой, сохраняем индекс
+        }
+    });
     
     hideTabContent();
-    showTabContent();
+    showTabContent(startTab); // Показать контент на основе сохраненной вкладки
 
 	tabsParent.addEventListener('click', function(event) {
         const target = event.target;
@@ -35,6 +44,7 @@ function tabs(tabsSelector, tabsContentSelector, tabsParentSelector, activeClass
                 if (tab == item) {
                     hideTabContent();
                     showTabContent(i);
+                    localStorage.setItem('figure', tab.getAttribute('id')); // Сохраняем вкладку в localStorage
                 }
             });
         }
