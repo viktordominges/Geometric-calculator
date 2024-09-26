@@ -1,0 +1,31 @@
+@import url('../modules/cube/cube.css');
+@import url('../modules/tabs/tabs.css');
+@import url('../modules/calculations/calculations.css');
+
+h1 {
+	margin: 30px 0 70px 0;
+	text-align: center;
+	text-transform: uppercase;
+}
+
+.wrapper {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+	align-items: center;
+}
+
+.show {
+    display: flex;
+	justify-content: space-around;
+	align-items: center;
+}
+
+.hide {
+    display: none;
+}
+
+.fade {
+    animation-name: fade;
+    animation-duration: 1.5s;
+}
