@@ -2,6 +2,14 @@
 @import url('../modules/tabs/tabs.css');
 @import url('../modules/calculations/calculations.css');
 
+body {
+	background-image: url('../img/school_board_2.png'), linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7));
+	background-blend-mode: overlay;
+    background-repeat: repeat;
+    background-size: cover;
+	
+}
+
 h1 {
 	margin: 30px 0;
 	text-align: center;
